@@ -50,16 +50,24 @@ namespace TCPWorker
                     callApis = false;
                 }
 
-                if (str.Equals("1:00 AM") && callApis == false)                
+                if (str.Equals("1:00 AM") && callApis == false)
                 {
-                    callApis = true;
-                    log.LogInformation($"Updating Balace...");
-                    HttpClient httpclientub = new HttpClient();
-                    StringContent httpContent = new StringContent("", System.Text.Encoding.UTF8, "application/json");
-                    httpclientub.Timeout = System.TimeSpan.FromSeconds(20);                    
+                    try
+                    {
+                        callApis = true;
+                        log.LogInformation($"Updating Balace...");
+                        HttpClient httpclientub = new HttpClient();
+                        StringContent httpContent = new StringContent("", System.Text.Encoding.UTF8, "application/json");
+                        httpclientub.Timeout = System.TimeSpan.FromSeconds(20);
 
-                    var response = await httpclientub.GetAsync("https://pins.3rtelecom.co.uk/api/api/UpdateBalance/");
-                    log.LogInformation($"{response}");
+                        var response = await httpclientub.GetAsync("https://pins.3rtelecom.co.uk/api/api/UpdateBalance/");
+                        log.LogInformation($"{response}");
+                    }
+                    catch(Exception err)
+                    {
+                        log.LogError($"Error: {err.Message}");
+                    }
+
 
                     if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
                     {
@@ -70,16 +78,30 @@ namespace TCPWorker
                         string toDate = DateTime.Now.AddDays(-1).ToShortDateString();
 
                         log.LogInformation($"Sending weekly MTU report...");
-                        var responseSendingReport = await httpclientubrep.GetAsync($"https://pins.3rtelecom.co.uk/api/api/WeeklyTransactions?from={fromDate}&to={toDate}&type=MTU");                         
-                        log.LogInformation($"{responseSendingReport}");
+                        try
+                        {
+                            var responseSendingReport = await httpclientubrep.GetAsync($"https://pins.3rtelecom.co.uk/api/api/WeeklyTransactions?from={fromDate}&to={toDate}&type=MTU");
+                            log.LogInformation($"{responseSendingReport}");
+                        }
+                        catch(Exception err)
+                        {
+                            log.LogError($"Error: {err.Message}");
+                        }
                                                 
                         HttpClient httpclientubrepIcc = new HttpClient();
                         StringContent httpContentrepIcc = new StringContent("", System.Text.Encoding.UTF8, "text/plain");
                         httpclientubrepIcc.Timeout = System.TimeSpan.FromSeconds(30);
 
                         log.LogInformation($"Sending weekly ICC report...");
-                        var responseSendingReportICC = await httpclientubrepIcc.GetAsync($"https://pins.3rtelecom.co.uk/api/api/WeeklyTransactions?from={fromDate}&to={toDate}&type=ICC");
-                        log.LogInformation($"{responseSendingReportICC}");
+                        try
+                        {
+                            var responseSendingReportICC = await httpclientubrepIcc.GetAsync($"https://pins.3rtelecom.co.uk/api/api/WeeklyTransactions?from={fromDate}&to={toDate}&type=ICC");
+                            log.LogInformation($"{responseSendingReportICC}");
+                        }
+                        catch(Exception err)
+                        {
+                            log.LogError($"Error: {err.Message}");
+                        }                        
                     }
                 }
                     
